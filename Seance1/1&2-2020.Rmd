@@ -1,5 +1,5 @@
 ---
-title: '**Séances 1 & 2 -- Analyse Statistique Appliquée avec Rstudio & friends!**'
+title: '**Séances 1 -- Analyse Statistique Appliquée avec Rstudio & friends!**'
 
 author: '**Thibaud Deguilhem** MCF, LADYSS 7533 - Université de Paris thibaud.deguilhem@u-paris.fr'
 
