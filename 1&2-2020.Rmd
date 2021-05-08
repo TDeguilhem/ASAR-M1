@@ -1,0 +1,1666 @@
+---
+title: '**Séances 1 & 2 -- Analyse Statistique Appliquée avec Rstudio & friends!**'
+
+author: '**Thibaud Deguilhem** MCF, LADYSS 7533 - Université de Paris thibaud.deguilhem@u-paris.fr'
+
+date: "`r Sys.Date()`"
+
+output:
+  rmdformats::readthedown:
+    self_contained: true
+---
+
+
+```{r setup, include=FALSE}
+library(knitr)
+library(rmdformats)
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=FALSE,
+	             cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+# **Introduction générale au cours d'ASA-R**
+
+<br>
+
+## **Objectif général du cours** 
+
+Rappelons que l'objectif général de ce cours consistera à **utiliser efficacement Rstudio en appliquant divers outils de l'analyse statistique afin de produire *in fine* des résultats/output** (sorties graphiques ou non) nécessaires, **avant de les interpréter et de le commenter**. 
+
+<br>
+
+## **Lectures obligatoires**
+
+Le premier chapitre (pp. 32--48) de l'ouvrage de Daniel J. Denis (2016) <https://drive.google.com/drive/folders/10pmxgDqRUkpGMPpdRxfBKYsR3cxb6fqp?usp=sharing> est incontournable en complément de cette introduction.
+
+<br>
+
+## **Le pourquoi de ce cours**
+
+Bien que ce cours ait été initialement construit spécifiquement pour les étudiant-e-s de Master 1 MECI et APE, **quiconque voulant apprendre à manipuler R pour faire de la statistique appliquée peut en bénéficier** et, pour cette raison, toutes les **fiches sont disponibles en ligne et accessibles librement** [sur la page du cours](https://www.tdeguilhem.com/asa-r--m1-ape-meci-me3ay020.html). 
+Si vous n’avez pas suivi de cours d’introduction aux statistiques en licence (statistiques descriptives en L1, inférentielles et économétrie en L2-L3), certains des concepts que nous allons utilisés pourront être difficiles (voir très difficiles...), mais je ferai de mon mieux pour les expliquer clairement dans les différentes fiches et, si nécessaire, de brefs rappels seront ajoutés en ligne durant le semestre. 
+
+De même, si R est votre premier langage de programmation, vous trouverez probablement les premières séances assez difficiles, tout logiciel a un certain **coût d'entrée** (plus ou moins élevé) *a fortiori* sans connaître les bases de la programmation informatique. Mais *don't worry* ! Si R est votre premier langage de programmation, c’est plutôt une très bonne nouvelle, dans la mesure où ce que vous allez apprendre ici vous aidera assurément lorsque vous passerez sur d’autres langages Python, SQL, C++ (n'est-ce pas les étudiant-e-s PISE ?). 
+
+Enfin, bien que les techniques quantitatives de ce cours s'appliquent à la plupart des questions élémentaires de *data analysis* dans la recherche en socio-économie ou dans le champ des études et du conseil, le cours proposera toujours une entrée "appliquée" aux sciences sociales à travers des exemples, des applications et des réplications adaptées avec R  afin d'aborder des problèmes couramment rencontrés dans la recherche et les études contemporaines (particulièrement intéressants pour les étudiant-e-s d'APE !).
+
+- *En quoi consiste ce cours (en quelques mots) ?*
+
+Ce cours est destiné à **présenter quelques uns des usages possibles de R** (Rstudio plus précisément) pour réaliser une "bonne" étude de statistique appliquée. A travers la connaissance et la maîtrise des "bonnes pratiques" du **code/langage "R"**, les étudiant-e-s qui suivent ce cours pourront alors développer différentes compétences importantes en techniques quantitatives pour leur parcours en recherche ou leur future alternance allant à la **gestion des données**, aux **représentations graphiques**, en passant par l'**inférence statistique**, l'**économétrie** et l'introduction à l'**analyse de la causalité**^[Seulement une première introduction, pour les PISE et les CCESE nous approfondirons cette question de la causalité au second semestre avec le cours d'*Analyse multivariée*.]. Parce qu'une recherche ou une étude est très fréquemment destinée à être diffusée, présentée, discutée et commentée, j'ajoute que les étudiants auront enfin pour objectif de produire des rapports automatisés avec `Markdown`. Ils présenteront ainsi leurs résultats dans un format propre à la diffusion et qui sera un préalable à l'apprentissage des dashboards.
+
+- *Qu'est-ce que ce cours n'est pas (en quelques mots) ?*
+
+Bien que les bases de mathématique, statistiques et probabilités acquises en licence soient nécessaires, ce cours ne couvre qu'une petite partie de ces différents domaines de la statistique appliquée et **jamais de façon théorique** ! Pourquoi ? Parce que nous croyons, comme l'indique Balboaca en introduction de son ouvrage paru en 2020^[*Applied and Computational Statistics*, Basel : MDPI Press.], qu'en sciences sociales "*une excellente théorie statistique n'a que peu de valeur en l'absence d'applicabilité sur des données réelles. En outre, toute excellente théorie mathématique trouvera sa fin tôt ou tard sans une mise en œuvre appropriée*". 
+
+Si vous souhaitez : (*i.*) entrer un peu plus dans la théorie statistique qui supporte l'ensemble des outils d'analyse que nous utiliserons et appliquerons, (*ii.*) effectuer des analyses plus complexes et avancées ou (*iii.*) créer des représentations graphiques que nous ne traiterons pas dans ce cours, notamment pour votre mémoire (peut-être !), je suis certain que vous trouverez la réponse en effectuant une recherche rapide sur Google ou en regardant toutes les [ressources conseillées sur la page du cours](https://www.tdeguilhem.com/asa-r--m1-ape-meci-me3ay020.html). Sinon, un forum est toujours [à votre disposition en ligne](https://helpstudents.tribe.so/group/asa-r-masters-meci-ape), utilisez tout ce qui est à votre disposition !
+
+<br>
+
+## **L'informatique et l'analyse statistique appliquée  (*computational statistics*) : un domaine récent et en expansion**
+
+Au début du XXème siècle, l'application de procédures statistiques simples telles que l'ANOVA (analyse de la variance à un ou plusieurs facteurs) ou la régression linéaire multiple étaient assez laborieuses et des procédures plus avancées telles que l'analyse factorielle ou celles plus complexes d'estimations semi-paramétriques nécessitaient une quantité importante de calculs matriciels alors très difficile à réaliser même pour des grandes équipes. On peut s'en douter en regardant la division du travail au sein d'un laboratoire de statistiques en 1930 (à Chicago)^[Pour plus de précision sur l'histoire des "computational statistics", voir <https://ww2.amstat.org/asa175/statcomputing.cfm>] :
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("1930.png")
+```
+
+Aujourd'hui, en raison de l'avancée dans le domaine informatique au cours du dernier demi-siècle, le champ de ce qui s'appelle *computational statistics* a **radicalement transformé la pratique de la statistique appliquée (applied statistics)**. Petit à petit les deux domaines qui été isolés^[Voir la fiche "La machine à penser :
+concurrencer les humains" sur le site [https://hist-math.fr/](https://hist-math.fr/).], *computational sciences* et les *statistics*, n'en n'ont fait plus qu'un, au point qu'aujourd'hui, parler de statistique appliquée, ne peut désormais plus se faire **sans la considérer comme la fusion des statistiques théoriques d'une part et de l'informatique d'autre part**, toutes les deux mises au service du traitement et de l'analyse de jeux de données de plus en plus nombreux et dont la collecte ne cesse de s'accélérer.
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("data.png")
+```
+
+Désormais, il est très facile de trouver un jeu de données^[Nous reviendrons sur cette question lors de la séance 3 mais sachez dès maintenant qu'il existe de nombreux catalogues contributifs en ligne, `Kaggle` par exemple : <https://www.kaggle.com/>.], de soumettre des données à l'un des innombrables programmes statistiques disponibles et obtenir une sortie (un résultat ou "*output*") donnant l'impression, fausse et dangereuse, que le logiciel permettant de produire des résultats statistiques prenait le pas sur les **questions (théoriques et analytiques) auxquelles l'analyse se proposait de répondre**. Cette croissance exponentielle de ce qui concerne la "data", de la collecte à l'analyse, peut être considérée comme une aubaine pour utiliser les données disponibles, toujours plus nombreuses, obtenir des informations très riches sur des contextes très divers et variés et, *in fine*, produire une analyse quantitative pertinente du monde social et/ou se positionner dans un débat à propos d'orientations de politiques publiques (*c.f. séances 4 à 9*). Mais, cela incite parfois à ne pas **se poser suffisamment les "bonnes" questions en amont du traitement et de l'analyse**^[Quelle est la question précise que l'on se pose ? Que nous disent les travaux antérieurs sur cette question ? Quels sont les arguments et les enjeux du débat académique et/ou institutionnel sur cette question ?] avant générer des analyses et produire des résultats à ce propos. Or, comme le note Guttag en ouverture de son ouvrage de 2013^[*Introduction to Computation and Programming Using Python*.
+Cambridge: MIT Press.], "*un ordinateur [à travers un software de statistics] fait deux choses, et deux choses uniquement : il effectue des calculs et il se souvient des résultats de ces calculs. Mais il fait ces deux les choses extrêmement bien*" (p. 1). Concernant de réelle capacités réflexives en amont de ces calculs, c'est ailleurs qu'il faudra chercher...^[Précisons que nous ne nions pas qu'une vive discussion, plus journalistique qu'académique d'ailleurs, existe sur la question de savoir si un ordinateur peut réellement "*penser*" ou non. Ce débat, qui rejoint plus largement celui de l'"intelligence artificielle" dont le terme "intelligence" correspond plus à de l'algorithmique d'apprentissage supervisé ou non (procédures de classifications notamment, *c.f.* semestre 2 du Master : cours d'"analyse multivariée appliquée") qu'à de véritables capacités réflexives, est bien au-delà de la portée de ce cours.]. 
+
+Il est évident que, dans la lignée de la statistique moderne et de l'ouverture réalisée par les trois mousquetaires du Galton Institute dont les travaux laissent parfois à désirer^[Voir la fiche "Dr. Jekill and Mr. Hyde :
+statistique et eugénisme" sur le site [https://hist-math.fr/](https://hist-math.fr/).], l'émergence des *Data sciences* au cœur de la recherche et des études quantitatives en sciences sociales sur les populations statistiques, les échantillons ou les modèles d'estimation/prévision ont permis de grandes avancées et d'appliquer les outils de la statistique théorique et mathématique à de nombreux domaines (géographie, économie, sociologie, psychologie, sciences politiques...) permettant de porter un regard différent sur des questions portant sur de nombreux phénomènes du monde social.
+
+L'augmentation de la puissance de calcul informatique combinée à cette articulation pertinente entre *data sciences* et *statistics* ont permis aux statistiques appliquées de devenir un outil très important (pas unique !) des sciences sociales à travers par exemple la construction d'algorithmes permettant de traiter des très grands jeux de données clients^[Ce que l'on appelle le "*Big Data*".]. Cette alliance entre statistiques appliquées sur informatique et sciences sociales est devenu presque incontournable dans nombre de sous-champs disciplinaires (la socio-économie, la sociologie et la géographie notamment !), apportant de nouveaux outils d'analyse quantitative, des résultats originaux (produits sur de très grands échantillons) et des questions supplémentaires à des problématiques anciennes comme nouvelles, multidisciplinaires, interdisciplinaires et transdisciplinaires. 
+
+```{r  out.width = "40%", fig.cap=""}
+knitr::include_graphics("SocSc.png")
+```
+
+Ce qui comptera pour nous dans ce cours d'ASA-R, c'est la capacité à obtenir un ordinateur (normalement c'est bon pour tout le monde...), et plus précisément les programmes R et Rstudio (on verra comment plus loin), pour produire ce que nous voulons en analyse statistique appliquée par rapport à différentes questions que nous nous poserons.
+
+*Pour résumer en quelques points cette introduction générale :* **pas de bonne analyse statistique appliquée en sciences sociales sans :**
+
+1. **une/plusieurs "bonne-s" question-s de recherche établies en amont de l'analyse et par rapport aux travaux antérieurs sur le sujet** 
+
+2. **de "bonnes" données correspondantes (collectées pour la question de recherche ou trouver pour)**
+
+3. **une bonne maîtrise des outils statistiques de collecte : "techniques d'échantillonnage"**
+
+4. **une connaissance approfondie des techniques d'analyse statistique (descriptive, inférencielle, économétrique)**
+
+5. **une "bonne" maîtrise des outils informatiques permettant d'appliquer ces techniques d'analyse sur les données à disposition**
+
+6. **Produire de "bons" résultats, adaptés et pertinents pour apporter des réponses à la question de recherche**
+
+7. **une "bonne" maîtrise des résultat afin d'interpréter "correctement" et "précisément" les output produits par rapport à la question que l'on se pose dans le contexte dans lequel ont été collectées les données**
+
+
+
+
+
+
+
+
+
+
+
+
+
+<br>
+
+# **Séances 1 et 2 : Découverte de R, Rstudio and friends**
+
+
+## **Lecture obligatoire**
+
+Le premier chapitre (pp. 31--48) de l'ouvrage de Daniel J. Denis (2020) <https://drive.google.com/drive/folders/10pmxgDqRUkpGMPpdRxfBKYsR3cxb6fqp?usp=sharing> est incontournable pour ces deux séances.
+
+
+<br>
+
+## **Les questions auxquelles vous devrez savoir répondre à la fin de la séance**
+
+- **Comment installer R et Rstudio sur mon ordinateur personnel ?**
+
+- **Comment utiliser l'interface de Rstudio et les différentes fenètres ?**
+
+- **Comment installer un package ?**
+
+- **Qu'est-ce qu'un vecteur et une matrice ? Comment manipuler ces objets avec R et à quoi servent-ils ?**
+
+- **Comment faire des maths avec Rstudio ?**
+
+<br>
+
+
+## **Objectif des séances 1 et 2**
+
+Ces deux premières séances d'introduction consistera d'abord en une présentation du logiciel Rstudio et à l'environnement R-Markdown. Par la suite, en revenant sur des notions élémentaires de mathématiques et/ou de statistiques, les étudiant-e-s comprendront rapidement la logique générale du code et le fonctionnement de Rstudio comme R-Markdown.
+
+
+<br>
+
+## **Quelques rappels (très rapides !) d'informatique élémentaire avant de débuter sur R**
+
+Fondamentalement, tous les langages informatiques contiennent des éléments constitutifs d'une langue propre et reconnue (les 0 et 1 qui composent le code binaire). À partir de cette "couche primaire", chaque logiciel produit une couche supérieure qui lui est propre, permettant de réaliser ce pour quoi le langage spécifique a été conçu. Pour un programme statistique tels que R et Rstudio, la couche supérieure comprendra, sans surprise, de nombreuses fonctions statistiques dont les commandes seront spécifiques (différentes sur STATA, sur Python etc.) !
+
+Prenons désormais un exemple : le calcul d'une moyenne arithmétique. Il serait laborieux si à chaque fois que nous le souhaitions, nous devions entrer dans R le code suivant :
+
+```{r, echo=TRUE}
+
+x <- c(0, 2, 5, 8, 9)
+
+x_mean <- sum(x)/length(x)
+
+```
+
+Résultat de cette commande : 
+
+```{r, echo=TRUE}
+
+x_mean
+```
+
+Nous avons bien calculé la moyenne arithmétique en additionnant les observations dans le "`vector(sum(x))`", puis en divisant par le nombre d'observations, appelé aussi la "longueur du vecteur" `length(x)` (quelques souvenirs de L1/L2 : $\bar{x} = \frac{1}{n}\sum^{i=1}_n nx_i$). Bien entendu, tout bon logiciel statistique ne nous obligera pas à faire ce calcul chaque fois que nous souhaitons calculer une
+moyenne. Au lieu de cela, les logiciels R et Rstudio ont des fonctions intégrées qui effectuent ces opérations
+automatiquement et beaucoup plus rapidement. Sur Rstudio, tout ce que nous avons à faire pour obtenir la moyenne est d'écrire :
+
+
+```{r R2, echo=TRUE}
+mean(x)
+```
+
+Cependant, il convient également de noter qu'au fond, les langages informatiques peuvent être
+réduit à ce que nous avons évoqué précédemment, ce que nous avons appelé "*code*". Ce "*code*" fait référence à ce qui se passe "dans les coulisses". En effet,  si tous les langages informatiques étaient limités au travail en "*code*", l'informatique dans son ensemble, même pour des choses très simples, prendrait une éternité ! Pour gagner du temps, les développeurs de logiciels "collent" des morceaux de "code" ensemble afin d'automatiser certaines commandes communes ou régulières. Ainsi, ces "choses" faites automatiquement, comme calculer la moyenne par "`mean(x)`", constitue un petit bout de programme spécifique pour justement calculer la moyenne (ça tombe bien, c'est ce que nous voulions) ! 
+
+Dès lors que nous entrons "`mean(x)`" sur un vecteur nommé "`x`" dans Rstudio (il faudra bien évident le définir préalablement...), le logiciel a déjà le code pré-organisé pour effectuer cette opération. Autrement dit, l'ordinateur a déjà l'algorithme/programme (le calcul d'une moyenne simple est un exemple d'algorithme et un programme est un algorithme !) mis en place pour que nous puissions simplement faire un appel à cette commande au lieu de déplacer des informations binaires pour le programmer à nouveau et perdre *in fine* beaucoup de temps.
+
+Alors, **pourquoi cette discussion est-elle intéressante ?** Il est tout simplement essentiel de comprendre le cheminement dans lequel nous nous apprêtons à nous engager, qui est celui de l'utilisation d'un langage informatique spécifique (R et Markdown) pour générer une sortie statistique ou autre que nous souhaitons ensuite interpréter. Connaître et maîtriser Rstudio signifie donc : **apprendre à interagir avec lui** et **lui faire faire ce que vous avez besoin de faire**.  Cette maîtrise nécessite **énormément d'essais et d'erreurs** (c'est le *coût d'entrée*) et les débutant-e-s dans la programmation ont parfois l’impression que les "expert-e-s" du domaine ne font jamais d'erreur et programment facilement sans recevoir de messages d'erreur : **FAKENEWS !**
+
+Les meilleurs programmeurs reçoivent continuellement des messages d'erreur et passent beaucoup de temps à sur le "*débogage*" de scripts et de programmes pour les faire fonctionner. Obtenir des messages d'erreur jusqu'à ce que quelque chose fonctionne est l'**art de la programmation**. La courbe d'apprentissage pour les langages de script tels que R peut paraître un peu raide au début, et souvent, vous penserez alors que l'ordinateur
+ne fera jamais ce dont vous avez besoin, mais avec **patience**, **persévérance**, **application** et **rigueur**, vous apprendrez les leçons de chaque erreur ou réussite et
+apprendrez maîtriser une nouvelle langue, la programmation en R, qui vous permettra d'échanger avec beaucoup de monde !
+
+Un schéma qui illustrera la combinaison de compétences nécessaires pour réussir efficacement dans ce cours et qui vous donnera un peu les pré-requis simplement en matière de motivation :
+
+```{r  out.width = "40%", fig.cap=""}
+knitr::include_graphics("S1.png")
+```
+
+Pour la plupart des étudiant-e-s, la bonne combinaison se situe quelque part
+le milieu où se trouvent la "science des données" (*data sciences*) et la "recherche traditionnelle". Mais les choses ne sont pas aussi simples. Apprendre et utiliser R et Rstudio, c'est aussi parfois apprendre à faire un peu de "code hors de sentiers battus" en cours de route. Notez la **zone de danger**, cependant, où avoir une certaine expertise de fond mais des connaissances très faibles en mathématiques et des statistiques vous fera échouer très probablement. Rappelez-vous bien que **R et Rstudio sont uniquement des outils** au service d'autres outils que sont les statistiques elles mêmes au service de questions théoriques/analytiques en sciences sociales...Le premier ne se substitue absolument pas au second qui ne se substitue absolument pas au troisième ! 
+
+*Avertissement pour ce cours :* **ne jamais supposer que les connaissances informatiques peuvent remplacer la maîtrise des mathématiques et des statistiques ou votre culture en sciences sociales**^[Les applications de ce cours seront basés sur des travaux menés en économie et en sociologie. Il sera nécessaire de connaître les enjeux du débat académique sur les différentes thématiques !]. Obtenir une sortie dans n'importe quel
+programme logiciel ne signifie pas comprendre la sortie, ou comprendre si ce que vous avez produit est correct, adapté et pertinent. 
+
+
+
+
+
+## **Qu'est-ce que R et Rstudio ?**
+
+R et Rstudio sont différents des autres logiciels de statistiques utilisées tels que SPSS et STATA par exemple,  où traditionnellement l'utilisateur soumet une collection de lignes de code ou de mini-programmes, tous à la fois, à quel point le
+l'ordinateur génère un tas de sorties, certaines sont bienvenues et utiles, mais le reste est potentiellement superflus et des codes supplémentaires doivent venir désactiver un jeu d'options pour configurer la sortie statistique adaptée. A l'inverse, pour la plupart des fonctions de R ou Rstudio, c'est allant chercher dans des "bibliothèques" (packages) et/ou des environnements spécifiques que R et Rstudio reconnaissent des lignes de code et produisent les sorties statistiques adaptées, ici chaque option est intégrée directement dans le code (très rarement par défaut). Cette manière de fonctionner ressemble un peu plus à un travail de développeur informatique, il faut donc connaître à la fois les bases du code mais aussi les packages que l'on utilise afin de converser avec le programme à la manière d'un informaticien. De cette façon, R est plus similaire aux langages informatiques (Python, Java, C++...).
+
+<br>
+
+## **Pourquoi R est si génial ?**
+
+Comme indiqué précédemment, vous avez probablement déjà une idée de pourquoi R est si génial. Cependant, afin de vous éviter d'abandonner la première fois que vous vous heurtez à un mur de programmation (fameux messages d'erreur), **voici six bonnes raisons de vous accrocher et de continuer** :
+
+1. R et Rstudio sont 100% gratuit^[Pas tout à fait pour Rstudio, mais les packs qui nous intéressent le sont.] et, par conséquent, s'appuie sur une très grande communauté d'utilisateurs (forum, blog, cours online...). Contrairement à SPSS, STATA, Matlab, Excel et JMP, R est, et sera toujours entièrement gratuit, c'est une certitude ! Cela n'aide pas seulement votre portefeuille, cela signifie qu'une immense communauté de programmeurs/utilisateurs/analystes/étudiants développera constamment de nouvelles fonctionnalités et des packages à une vitesse qui dépasse ses concurrents ! Contrairement au Fight Club (pour ceux qui ont vu ce "vieux" film...), la première règle de R est : **"parlez de R !"**. Si jamais vous avez une question sur la façon de mettre en œuvre quelque chose avec R, une recherche rapide Google vous mènera assurément à une réponse.
+
+2. R domine de la tête et des épaules les autres logiciels ! Pour illustrer cela, regardez simplement les deux figures suivantes : 
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("SPSS.png")
+```
+
+3. R fait parti désormais du présent et l'avenir de la programmation statistique car, de plus en plus, des interfaces entre R et les autres logiciels statisitques tels que Python sont développées^[Par exemple Jupyter permettant de coder en R et en Python dans le même notebook. Voir : <https://www.dataquest.io/blog/jupyter-notebook-tutorial/>,  pour une introduction à Jupyter avec Python, et pour un exemple de notebook commun R et Python (et GAMs) : <https://towardsdatascience.com/guide-to-r-and-python-in-a-single-jupyter-notebook-ff12532eb3ba>.]. 
+
+4. R est incroyablement polyvalent ! Vous pouvez utiliser R pour tout faire, du calcul de simples statistiques récapitulatives à la réalisation de simulations complexes en passant par la cartographie, l'analyse de réseaux, la création de représentations graphiques magnifiques comme le diagramme ci-dessous (avec le package "circlize"). Si vous pouvez imaginer une tâche analytique, vous pouvez presque certainement l'implémenter dans R.
+
+```{r FigureA, echo=FALSE}
+
+library(circlize)
+
+circlize::chordDiagram(matrix(sample(10), 
+                              nrow = 2, ncol = 5))
+```
+
+5. En utilisant RStudio (ce que nous allons faire), un programme pour vous aider à écrire du code R, vous pouvez facilement et de manière transparente combiner du code R, des analyses, des représentations graphiques et du texte écrit dans des documents élégants en un seul endroit à l'aide de Sweave (R et Latex) ou RMarkdown (ce que nous allons faire aussi). En fait, j'ai traduit tout ce cours (le texte, la mise en forme, les graphiques, le code… oui, tout) dans RStudio en utilisant Sweave (Markdown + Knirt). Avec RStudio et Sweave, au lieu d'essayer de gérer deux ou trois programmes, disons Excel, Word et (pfff...) SPSS, où vous passez la moitié de votre temps à copier, coller et formater des données, des images et des tests, vous pouvez tout faire en un place pour que rien ne soit mal lu, mal saisi ou oublié.
+
+6. Les analyses effectuées dans R sont transparentes, facilement partageables et reproductibles ! Si vous demandez à un utilisateur SPSS/STATA comment il a effectué une analyse spécifique, il va soit A) ne pas s'en souvenir, B) essayer (nerveusement) de construire sur place une procédure d'analyse qui a du sens - qui peut ou non correspondre à ce qu'il a réellement fait il y a des mois ou des années, ou C) Vous demandez ce que vous faites dans sa maison ! J'utilise moi-même principalement STATA et R, donc je parle d'expérience à ce sujet. Si vous demandez à un utilisateur R (qui utilise de bonnes techniques de programmation, celles que nous allons voir ensemble !) comment il a effectué une analyse, il devrait toujours être en mesure de vous montrer le code exact qu'il a utilisé. Bien sûr, cela ne signifie pas qu'il a utilisé l'analyse appropriée ou l'a interprétée correctement, mais avec tout le code d'origine, tout problème d'ordre technique doit être complètement transparent !
+
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("meme.png")
+```
+
+<br>
+
+## **Installation de R et Rstudio**
+
+R est un logiciel de statistique distribué gratuitement par le *Comprehensive R Archive Network* (**CRAN**) à l'adresse suivante pour Windows : [http://cran-r-project.org/](https://cran.r-project.org/bin/windows/base/), ou pour Mac OS : [http://cran-r-project.org/](https://cran.r-project.org/bin/macosx/).
+
+**Attention**, l'installation varie d'un système d'exploitation à l'autre mais les fonctionnalités, le code associé restent les mêmes et la plupart des programmes sont portables d'un système à l'autre.
+
+Contrairement à une idée reçue largement véhiculée, R et Rstudio sont deux applications/logiciels différents. Pourtant, pour utiliser Rstudio il faut d'abord installer R.RStudio est un logiciel distinct qui fonctionne avec R pour rendre R beaucoup plus convivial avec des fonctionnalités utiles qui rendent votre programmation R plus facile et plus efficace. RStudio fonctionne sous Windows Mac et Linux et même sur le Web en utilisant RStudio Server/cloud. 
+
+Ainsi, Rstudio repose sur R qui est un langage de script conçu initialement spécifiquement pour l'analyse statistique et
+la gestion des données données. C'est un dérivé du langage de programmation "`S`", mais il est gratuit et est
+continuellement mis à jour par les contributeurs grâce à ses nombreux packages. 
+
+L'installation de R et Rstudio est très facile ([voir la fiche "tuto" en ligne ici](https://drive.google.com/file/d/1dH3ZQVgDp8M4HEGWZSZ7OLILZ84yM6nU/view?usp=sharing) ou la [page ici](http://larmarange.github.io/analyse-R/installation-de-R-et-RStudio.html)), il suffit de suivre les instructions !
+
+
+- **Installation de R**
+
+Accédez au site Web de R Project et [téléchargez R](https://cran.r-project.org/) pour votre système d'exploitation.
+
+- **Installation de Rstudio**
+
+Une fois R installé, allez sur le site Web de Rstudio et cliquez sur [Télécharger Rstudio](https://www.rstudio.com/) et suivez les instructions de votre système d'exploitation.
+
+Dans le cadre de ce cours nous n'utiliserons que Rstudio mais sachez que R et Rstudio sont deux logiciels différents (et oui !) bien que le second utilise le code du premier (mais pas que...) et rend surtout R beaucoup plus convivial avec des fonctionnalités utiles qui rendent la programmation en R plus facile et plus efficace.
+
+
+
+<br>
+
+
+## **Présentation de l'interface de Rstudio**
+
+
+
+Maintenant que Rstudio est installé, ouvrez le en cliquant sur l'icône du bureau, et c'est parti !
+
+```{r  out.width = "20%", fig.cap=""}
+knitr::include_graphics("Rstudiologo.png")
+```
+
+Rstudio est un environnement de développement intégré (IDE) pour R. Il comprend une console, un éditeur de coloration syntaxique qui prend en charge l'exécution directe de code, ainsi que des outils de traçage, d'historique, de débogage et de gestion de l'espace de travail.
+
+Lorsque vous lancez Rstudio, vous verrez les quatre fenêtres ou volets suivants.
+
+- **Le "code editor"**
+- **La console**
+- **Environnement de travail ("workspace")/Historique**
+- **Graphiques et fichiers**
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("Rstudio.png")
+```
+
+### **Le "code editor"**
+
+Le volet "code editor" (dans le cadrant en haut à gauche par défaut) est l'endroit où vous créez et modifiez des scripts écrit en R ou autres langages connus par Rstudio, comme nous le verrons avec RMarkdown. Dit autrement, il s'agit de vos collections de codes (à enregistrer bien évidement) ! Don't worry, **les scripts R ne sont que des fichiers texte avec l'extension ".R"**. Lorsque vous ouvrez RStudio, il démarre automatiquement un nouveau script sans titre. Avant de commencer à taper un script R sans titre, vous devez toujours enregistrer le fichier sous un nouveau nom de fichier (comme "*Pirates_analysis.R*"). De cette façon, si quelque chose se bloque sur votre ordinateur pendant que vous travaillez, Rstudio conservera votre code et l'ouvrira automatiquement à la réouverture de Rstudio.
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("CODE2.png")
+```
+
+Vous remarquerez que lorsque vous saisissez du code dans un script dans le panneau d'édition (dit aussi "source"), R n’évalue pas réellement le code pendant que vous tapez. Pour que R évalue réellement votre code, vous devez d'abord "envoyer" le code à la console (nous en parlerons dans la section suivante).
+
+Il existe de nombreuses façons d'envoyer votre code depuis la source vers la console. Le moyen le plus lent est de copier et coller. Un moyen plus rapide est de mettre en évidence le code que vous souhaitez évaluer et de cliquer sur le bouton "Exécuter" en haut à droite de l'éditeur (en cliquant sur la commande en jaune "*run*"). Vous pouvez également utiliser la touche de raccourci ```Commande + Retour``` sur Mac ou ```Ctrl + Entrée``` sur PC pour envoyer tout le code en surbrillance à la console.
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("CODE.png")
+```
+
+<br>
+
+### **La console : le cœur de Rstudio !**
+
+La console est le cœur de Rstudio. C'est là que Rstudio évalue réellement le code. Au début de la console, vous verrez le texte comme ci-dessous avec la fin, une flèche bleue. C'est une invitation qui vous indique que Rstudio (même chose sur R !) est prêt pour un nouveau code. 
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("Console.png")
+```
+
+
+Vous pouvez taper du code directement dans la console après l'invitation ("`>`") et obtenir une réponse immédiate. Par exemple, si vous tapez ```1 + 1``` dans la console et appuyez sur `Entrée` **[pratique]**, vous verrez que Rstudio donne immédiatement une sortie de 2^[Ne vous inquiétez pas pour le [1] devant le résultat pour le moment, nous y reviendrons plus tard.], comme par magie, Rstudio sais compter !
+
+```{r, echo=TRUE}
+1 + 1
+```
+
+Chaque instruction (par exemple "`1 + 1`") écrite dans la console doit être validée en appuyant sur `Entrée` pour être exécutée. Si l'instruction est "correcte" (reconnu par Rstudio en fonction des packages chargés, *c.f.* onglet "packages"), Rstudio redonne la main après l'exécution et indique "`>`", vous invitant alors à recommencer ! Au contraire, si l'inscription est incorrecte ([**pratique**] essayez par exemple : "`1 + `"), alors Rstudio retourne le signe "`+`", vous invitant à compléter l'inscription (il manque quelque chose). On sort alors du problème en complétant simplement à la suite du plus ([**pratique**] ajoutez un "`1`" à la suite du "`+`"). On peut aussi récupérer la main en tapant "`Ctrl + c`" ou "`Echap`". Si l'inscription est erronée, alors un message d'erreur apparaît ([**pratique**] essayez par exemple : "`mea(x)`")
+
+
+Ensuite, tapez le même code dans l'éditeur de code (source), puis envoyez le code à la console en mettant en surbrillance le code et en cliquant sur le bouton Exécuter "dans le coin supérieur droit de la Fenêtre source Vous pouvez également utiliser le raccourci clavier sur Mac ou sous Windows **[pratique]**.
+
+Comme vous pouvez le voir, vous pouvez exécuter du code soit en l'exécutant à partir de l'éditeur, soit en le tapant directement dans la console. Cependant, 99% du temps, vous devriez utiliser l'éditeur plutôt que la console. La raison en est simple : si vous tapez du code dans la console, il ne sera pas enregistré (bien que vous puissiez consulter l'historique de vos commandes, on y reviendra). Et si vous faites une erreur en tapant du code dans la console, vous devrez tout retaper à nouveau. Au lieu de cela, il vaut mieux écrire tout votre code dans l'éditeur en enregistrant régulièrement votre travail. Lorsque vous êtes prêt à exécuter du code, vous pouvez ensuite l'envoyer, "Exécuter"/"Run", à la console.
+
+
+**A retenir :** *essayez toujours d'écrire la majeure partie de votre code dans l'éditeur de code et non directement dans la console. Réservez la console pour déboguer ou faire des analyses rapides*.
+
+
+
+<br>
+
+### **L'environnement de travail et l'historique**
+
+
+L’onglet environnement ("workspace") situé dans le cadrant en haut à droite par défaut affiche les noms de tous les objets de données (tels que les vecteurs, les matrices et les dataframes) que vous avez définis dans votre session actuelle. Par exemple, nous pouvons définir un vecteur "addition" avec l'opération précédente **[pratique]**. Vous pouvez également afficher des informations telles que le nombre d'observations et de lignes dans les objets de données. L'onglet a également quelques actions cliquables comme Importer un jeu de données qui ouvrira une interface utilisateur graphique (GUI) pour les données importantes dans Rstudio. Cependant, ce menu s'oublie rapidement et on finit par ne plus le regarder.
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("workspace.png")
+```
+
+
+L'onglet historique de ce panneau vous montre simplement un historique de tout le code que vous avez précédemment évalué dans la console. Pour être honnête, je ne regarde jamais ça. En fait, je n'avais même pas réalisé qu'il était là avant de commencer à écrire ce cours !
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("history.png")
+```
+
+À mesure que vous vous familiariserez avec Rstudio, vous trouverez peut-être le panneau Environnement/Historique utile. Mais pour l'instant, vous pouvez simplement l'ignorer. Si vous souhaitez désencombrer votre écran, vous pouvez même simplement minimiser la fenêtre en cliquant sur le bouton Réduire en haut à droite du panneau **[pratique]**.
+
+
+
+
+
+<br>
+
+### **Les sorties graphiques et les fichiers (packages, help etc...)**
+
+Le panneau Fichiers/Graphiques/Packages/Aide vous montre de nombreuses informations utiles. Passons en revue chaque onglet en détail:
+
+- *Fichiers* : le panneau des fichiers vous donne accès au répertoire de fichiers sur votre disque dur. Une fonctionnalité intéressante du panneau "Fichiers" est que vous pouvez l'utiliser pour définir votre répertoire de travail - une fois que vous accédez à un dossier dans lequel vous souhaitez lire et enregistrer des fichiers, cliquez sur "Plus", puis sur "Définir comme répertoire de travail". 
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("files.png")
+```
+
+Par défaut, les données de travail et les commandes utilisées seront enregistrées à l'emplacement où Rstudio a été ouvert, en l'occurrence, là où il a été installé... Mais il est souhaitable de modifier le répertoire de travail avec la fonction "`setwd()` ou en allant dans "`Session`" puis dans "`Set Working Directory`".
+
+Pour quitter une session sur Rstudio, vous pouvez choisir "sortir" et répondre positivement à la question suivante :
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("history.png")
+```
+
+Une icône R sera alors créée dans le répertoire de travail ("`working directory`" ou "`wd`"). En redémarrant Rstudio, la session s'ouvrira automatiquement avec son répertoire concerné et les objets créés ! 
+
+
+
+
+
+- *Graphiques* : le panneau "Plots" (pas de grande surprise), montre toutes vos sorties graphiques. Il existe des boutons pour ouvrir le tracé dans une fenêtre séparée et exporter la sortie au format pdf ou jpeg (bien que vous puissiez également le faire avec du code en utilisant les fonctions "`pdf()`" ou "`jpeg()`").
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("PLOT.png")
+```
+
+
+Voyons comment les graphiques sont affichés dans le panneau "Graphiques". Exécutez le code à droite pour afficher un histogramme des poids des poulets stockés dans l'ensemble de données "`ChickWeight`". Lorsque vous le faites, vous devriez voir un histogramme similaire à celui de la figure ci-dessous apparaître dans le panneau graphique.
+
+```{r, echo=TRUE}
+
+data("ChickWeight")
+
+hist(x = ChickWeight$weight,
+     main = "Chicken Weights",
+     xlab = "Weight",
+     col = "skyblue",
+     border = "white")
+```
+
+
+
+- *Packages* : affiche une liste de tous les packages Rstudio installés sur votre disque dur et indique s'ils sont actuellement chargés ou non. Les packages chargés dans la session en cours sont vérifiés tandis que ceux qui sont installés mais pas encore chargés ne le sont pas. Nous aborderons les packages plus en détail dans la section suivante.
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("pack.png")
+```
+
+
+Lorsque vous téléchargez et installez Rstudio pour la première fois, vous installez le logiciel de base Rstudio qui contiendra la plupart des fonctions que vous utiliserez quotidiennement comme "`mean()`" et "`hist()`". Cependant, seules les fonctions écrites par les auteurs originaux du langage Rstudio apparaîtront ici. Si vous souhaitez accéder aux données et aux programmes écrits par d'autres personnes, vous devrez les installer sous forme de "packages". Un package R est simplement un ensemble de données, des fonctions, aux menus d'aide, aux vignettes (exemples), stockées dans un pack que l'on peut ajouter à notre version de base de Rstudio.
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("package1.png")
+```
+
+Un "package" est comme une ampoule. Pour l'utiliser, vous devez d'abord l'avoir à la maison, c'est évident ! Sur Rstudio, cela signifiera l'avoir sur notre version de Rstudio en l'installant. Une fois que vous avez installé un package, vous n’avez plus jamais besoin de l’installer à nouveau (attention au restarting de session !). Cependant, chaque fois que vous souhaitez utiliser le package, vous devez l'activer en le chargeant. Voici comment procéder.
+
+- *Installer un nouveau package*
+
+Installer un package signifie simplement télécharger le code du package sur votre version de Rstudio. Il existe deux manières principales d'installer de nouveaux packages. La première méthode, et la plus courante, consiste à les télécharger à partir du CRAN. Le CRAN est LE référentiel central des packages R utilisable avec Rstudio. Pour installer un nouveau package R à partir du CRAN, vous pouvez simplement exécuter le code "`install.packages("nom")`", dans lequel le "nom" est le nom du package. Par exemple, pour télécharger le package dénommé "yarrr", qui contient plusieurs ensembles de données et fonctions, vous devez exécuter ce qui suit [**pratique**] :
+
+```{r, echo=TRUE, eval=FALSE}
+install.packages("yarrr")
+```
+
+Lorsque vous exécutez la commande "`install.packages("nom")`", Rstudio téléchargera le package depuis CRAN (on le voit dans la console !). Si tout fonctionne, vous devriez voir des informations sur l'endroit où le package est téléchargé, en plus d'une barre de progression.
+
+Comme pour commander une ampoule, une fois que vous avez installé un package sur votre ordinateur, vous n’avez plus jamais besoin de l’installer à nouveau (à moins que vous ne souhaitiez essayer d’installer une nouvelle version du package). Cependant, chaque fois que vous souhaitez l'utiliser, vous devez l'activer en le chargeant.
+
+- *Chargement d'un package*
+
+Une fois que vous avez installé un package, il est sur votre ordinateur (votre version de Rstudio). Cependant, ce n'est pas parce qu'il se trouve sur votre ordinateur que Rstudio est prêt à l'utiliser. Si vous souhaitez utiliser quelque chose, comme une fonction ou un ensemble de données, à partir d'un package, vous devez toujours charger le package dans votre session Rstudio. Tout comme une ampoule, vous devez l'allumer pour l'utiliser !
+
+Pour charger un package, vous utilisez la fonction "`library()`". Par exemple, maintenant que nous avons installé le package "yarrr", nous pouvons le charger avec la "`library("yarrr")`" :
+
+```{r, echo=TRUE}
+library("yarrr")
+```
+
+Maintenant que vous avez chargé le package "yarrr", vous pouvez utiliser l’une de ses fonctions ! L'une des fonctions les plus intéressantes de ce paquet s'appelle "`pirateplot()`". Plutôt que de vous dire ce qu'est un graphique de pirates, faisons-en un. Exécutez le morceau de code suivant pour créer votre propre pirate plot. Ne vous inquiétez pas des détails du code ci-dessous, vous en apprendrez plus sur le fonctionnement de tout cela plus tard. Pour l'instant, exécutez simplement le code et émerveillez-vous devant votre graphique !
+
+```{r, echo=TRUE}
+
+pirateplot(formula = weight ~ Time, 
+           data = ChickWeight,
+           pal = "xmen")
+
+```
+
+Il existe une manière dans Rstudio de charger temporairement un package sans utiliser la fonction "`library()`". Pour ce faire, vous pouvez simplement utiliser la notation "`package::function`". Cette notation indique simplement à Rstudio de charger le package uniquement pour ce morceau de code. Par exemple, je pourrais utiliser la fonction pirateplot du package "yarrr" comme suit :
+
+```{r, echo=TRUE}
+
+yarrr::pirateplot(formula = weight ~ Diet,
+                  data = ChickWeight)
+
+```
+
+
+
+- *Aide* : comme tout bon logiciel, Rstudio comprend un menu d'aide pour les fonctions R. Vous pouvez soit taper le nom d'une fonction dans la fenêtre de recherche, soit utiliser le code pour rechercher une fonction avec le nom.
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("Help.png")
+```
+
+```{r, echo=TRUE, eval=FALSE}
+?hist   # Comment fonctionne la commande histogramme ?
+
+?t.test # Celle du T-test ?
+```
+
+ou encore :
+
+```{r, echo=TRUE, eval=FALSE}
+help(hist)   # Comment fonctionne la commande histogramme ?
+
+help(t.test) # Celle du T-test ?
+```
+
+
+<br>
+
+# **Rappels de mathématiques et de statistiques avec Rstudio !**
+
+## **Basic mathematics**
+
+Maintenant que Rstudio a été installé avec succès sur votre ordinateur, il est temps de se familiariser avec le logiciel. Nous l'avons déjà vu, R peut-être considérer comme une calculatrice, extrêmement puissante, et commencez à faire des choses avec lesquelles vous utiliseriez autrement votre calculatrice `Casio FX-92 Collège` ou `TI 83` ! Nous l'avons vu également, un "`#`" peut apparaître dans un code informatique. Avec ce symbole nous indiquons à Rstudio un commentaire (comme sur Python), ce symbole "`#`" est destiné à dire le logiciel de ne pas l'incorporer. Dans le cas contraire, nous verrions continuellement des messages d'erreur lorsque nous essayions d'étiqueter quelque chose avec un commentaire.
+
+Examinons désormais quelques petits exemples des opérations mathématiques de base dans Rstudio [**pratique**]. 
+
+ - **Additionner** : `1755` et `2421`
+ - **Soustraire** : `9567` à `54902`
+ - **Multiplier** : `44` par `126`
+ - **Diviser** : `8904` par `6`
+
+```{r, echo=TRUE}
+
+1755 + 2421 
+
+54902 - 9567
+
+44 * 126
+
+8904 / 6
+```
+
+Sachez que Rstudio ne reconnaît pas toujours la façon dont nous écrivons communément les mathématiques.
+Par exemple, si nous voulions multiplier 2 et 3 ensemble, sur papier nous pourrions écrire (2)(3) = 6. Cependant, dans Rstudio, voici ce qui se passe lorsque nous essayons ceci:
+
+
+```{r, echo=TRUE, eval=FALSE}
+
+(2)(3)
+
+```
+
+En bref, le programme n’a pas pu exécuter ce que nous pensions être manière d'écrire la multiplication. Tel est le processus d'apprentissage d'un langage informatique, pour apprendre ce que le programme reconnaitra ou non il faut essayer ou se renseigner^[RTFM !] !
+
+Mais Rstudio est beaucoup mieux que votre calculatrice préférée...car il respectera automatiquement l'ordre des opérations :
+
+```{r, echo=TRUE}
+
+2 * 3 + 5
+
+```
+
+Notez que Rstudio a d'abord multiplié 2 et 3, puis ajouté 5 (étonnant !). C'est la même chose que nous
+devrions faire manuellement, donc nous pouvons voir que Rstudio connaît très bien le fameux "CEDMAS" (crochets, puis exposants, puis division / multiplication, puis addition / soustraction). Nous pouvons voir rapidement comment Rstudio peut gérer des séries d'opérations arithmétiques plus compliquées :
+
+```{r, echo=TRUE}
+
+((2 * 3) + 6 - (2 / 3 - 11))/6^5
+
+```
+
+
+La dernière partie de l'expression ci-dessus, `6^5`, est bien évidemment l'exponentiel, c'est-à-dire "6 élevé à
+l'exposant 5" ou $6^5$ (confirmez vous-même sur votre smartphone qu'il vaut `7776` !).
+
+Rstudio peut bien sûr gérer des mathématiques beaucoup plus compliquées que les précédentes. Par exemple, il peut calculer des logarithmes, des exponentiels, des dérivés et des intégrales, pour n'en nommer que quelques-uns. Par exemple, vous vous souvenez peut-être que le logarithmique
+et les fonctions exponentielles sont inverses l'une de l'autre. On peut démontrer ça facilement avec Rstudio :
+
+```{r, echo=TRUE}
+
+log(10)
+
+exp(2.302585)
+
+```
+
+A l'erreur d'arrondi prêt, nous voyons $e^{2,302585}$ est égal à $log(10)$. nous pouvons arrondir le nombre à l'entier le plus proche en utilisant "`round()`" :
+
+```{r, echo=TRUE}
+
+round(exp(2.302585))
+
+```
+
+Autrement dit, le logarithme (naturel) d'un nombre en base $e$ est l'exposant auquel nous élevons $e$ pour obtenir ce nombre (ouf !) !
+
+Nous utiliserons cette relation inverse entre les logs
+et les exposants lorsque nous étudierons la régression logistique plus loin dans ce cours (*c.f. Séance 7*). Si vous êtes familier avec les dérivés (si vous ne l'êtes pas, c'est le moment de les revoir !), alors vous savez que la dérivée de la fonction suivante, $f(x) = 5x + 3$ est égale à $5$. Autrement dit, $f'(x) = 5$. Mais Rstudio peut calculer cela pour nous :
+
+```{r, echo=TRUE}
+
+D(expression(5*x + 3),"x")
+
+```
+
+Vous pouvez également contrôler les décimales grâce à Rstudio. Par exemple :
+
+```{r, echo=TRUE}
+
+print(pi, digits = 3)
+
+print(pi, digits = 20)
+
+```
+
+**Attention** : *la fonction "`digits`" correspond au nombre de chiffres renvoyés par Rstudio dans le résultat et non le nombre de décimales !*
+
+Rstudio permet également de vérifier la relation entre les membres d'une équation :
+
+```{r, echo=TRUE}
+
+1/2 * 2 == 1
+
+```
+
+Ce qui précède est évidemment vrai comme l'indique la réponse boolèenne reçue, et Rstudio le confirme. Cependant, `1/2` n'a qu'une seule décimale et, par conséquent, 0,5 multiplié par 2 est facilement être égal à 1. Cependant, si l'expression avait était ce qui suit, nous aurions
+a obtenu une réponse différente :
+
+```{r, echo=TRUE}
+
+sqrt(2)^2 == 2
+
+```
+
+Bien sûr, nous nous serions attendus à ce que l'énoncé soit vrai, car le carré de la racine carrée ("`sqrt()`") de 2 devrait éliminer cette racine carrée et renvoyer simplement le nombre 2 !
+
+Cependant, la raison pour laquelle l'instruction est fausse est que le nombre "`sqrt(2)`" est une approximation et n'a pas de représentation décimale finie. Par conséquent, la déclaration d'égalité mathématique ne peut pas être vraie (mathématiquement) ! 
+
+Nous pourrions résoudre ce problème à l'aide du package "dplyr" (très utile !) et sa fonction "`near()`" ou "approximation" :
+
+```{r, echo=TRUE, eval=FALSE}
+
+install.packages("dplyr")
+
+library(dplyr)
+```
+
+```{r, echo=TRUE, eval=FALSE}
+
+near(sqrt(2)^2, 2)
+
+```
+
+
+Ne vous laissez pas berner non plus lorsque Rstudio rapporte une virgule décimale finie à $\sqrt2$. Le numéro suivant n'a pas que 6 positions à droite du virgule, Rstudio arrondit simplement le nombre à six décimales.
+
+Notons que des valeurs spéciales sont parfois renvoyées par Rstudio : "`Inf`" pour l'infinité et "`NaN`" pour
+"`Not a Number`", valeurs résultant de problèmes de calcul. Par exemple :
+
+```{r, echo=TRUE}
+
+exp(1e10)
+
+```
+
+Ou :
+
+```{r, echo=TRUE}
+
+log(-2)
+
+```
+
+<br>
+
+## **Fonctions et courbes**
+
+
+En parlant de mathématiques, il nous incombe de passer brièvement en revue les types de fonctions que R peut représenter. La fonction "`curve()`" est particulièrement utile pour cela. 
+
+On entre d'abord une fonction linéaire définie par la variable "`x`", puis on spécifie la plage de valeurs du domaine sur laquelle la fonction sera représentée. Pour la fonction $f(x) = 14x + 5$ sur l'intervalle allant de $x=5$ à $x=100$ (autrement dit, $\forall x \in [5, 100]$) :
+
+
+```{r, echo=TRUE}
+
+curve(14*x + 5, 5, 100)
+
+```
+
+
+Pour un polynôme défini par la variable "`x`", on spécifie également la plage de valeurs pour le domaine. Pour rappel : le domaine de la fonction est l'ensemble des valeurs possibles qui peuvent être saisies dans la fonction. Par exemple, considérons le polynôme $f x= 4x^2 + 3$. 
+
+C'est une fonction quadratique, que nous pouvons facilement écrire dans R : `4 ∗ x^2 + 3`, rien de plus simple ! 
+
+Maintenant, spécifions la plage de représentation des valeurs pour le domaine de définition afin que la fonction ne prenne que des valeurs positives de 0 à 100 (pour rappel : $\forall x \in [0; 100]$). Ainsi :
+
+
+```{r, echo=TRUE}
+
+curve(4*x^2+3, 0, 100)
+
+```
+
+À première vue, la courbe ne ressemble pas beaucoup à une parabole... Pourquoi ? 
+
+Rappel : cela est dû à la façon dont nous avons spécifié la plage de représentation sur le domaine de définition : uniquement $x>=0$ ! Si nous réduisons la plage de −1 à 1, nous obtenons quelque chose de plus juste :
+
+```{r, echo=TRUE}
+
+ curve(4*x^2+3, -1, 1)
+
+```
+
+La courbe ressemble maintenant à la parabole avec laquelle nous sommes plus familiers. Les polynômes, comme nous le verrons plus loin dans ce cours, peuvent être utilisés pour ajuster les données dans la régression (*c.f.* Séance 6)^[Nous apprendrons aussi à faire des choix. En effet, Si une droite (fonction linéaire) constitue le meilleur ajustement pour un nuage de points, alors la méthode est celle de la régression linéaire : rappelez-vous qu'une droite est simplement un polynôme de degré 1 ! Mais nous verrons aussi que ce n'est pas toujours le cas...].
+
+ Si un polynôme différent est théorisé pour s'adapter aux données, alors la régression polynomiale devient une option. Comme dans l'exemple présenté ci-dessous dans lequel on voit un jeu de données distribué sur deux variables "`x`" et "`y`". Dans ce cas, un polynôme de degré 3 ("polynôme cubique") est un ajustement raisonnable à la forme prise par la relation entre  "`x`" et "`y`" :
+
+```{r, echo=TRUE, cache=TRUE}
+
+ x <- runif(300,  min=-10, max=10) 
+y <- 0.1*x^3 - 0.5 * x^2 - x + 10 + rnorm(length(x),0,8) 
+ 
+# graphique de y en x :
+plot(x,y,col=rgb(0.4,0.4,0.8,0.6),pch=16 , cex=1.3) 
+ 
+# Trouver la fonction polynomiale ?
+
+model <- lm(y ~ x + I(x^2) + I(x^3))
+ 
+# Pour chaque valeur de x, nous pouvons avoir la valeur estimée de y par le modèle, et l'ajouter au graphique !
+myPredict <- predict( model ) 
+ix <- sort(x,index.return=T)$ix
+lines(x[ix], myPredict[ix], col=2, lwd=2 )  
+
+# On peut enfin "customiser" un peu le graphique en question !
+coeff <- round(model$coefficients , 2)
+text(3, -70 , paste("Modèle : ",coeff[1] , " + " , coeff[2] , "*x"  , "+" , coeff[3] , "*x^2" , "+" , coeff[4] , "*x^3" , "\n\n"))
+
+```
+
+
+C'est ce que nous apprendrons à faire dans ce cours : choisir le meilleur modèle à appliquer sur nos données !
+
+
+<br>
+
+## **Vecteurs et scalaires**
+
+**Une compréhension de base des vecteurs et des matrices est essentielle pour comprendre les statistiques appliquées et l'analyse des données**. Heureusement, la plupart des concepts sont très intuitifs et peut être expliqué à l'aide de démonstrations dans Rstudio.
+
+Un vecteur peut être défini soit comme une liste de nombres, définition informatique du terme, soit comme un segment de ligne de magnitude et de direction déterminées, définition physique du terme. Lorsque nous définissons généralement un vecteur en statistiques appliquées ou en analyse des données, nous **agrégeons simplement une série d'observations sur une variable**. Techniquement, un vecteur peut également être constitué uniquement d'un **nombre unique, auquel cas il est généralement appelé scalaire**. Il y a différentes manières de créer un vecteur dans Rstudio. Courrament, cela consistera simplement à lister les nom que vous souhaitez donner au vecteur, suivi de la suite d'éléments attribués à
+ce vecteur. Par exemple, ce qui suit attribue le nom "`x`" à la liste "`1, 3, 5, 7, 9`" :
+
+
+```{r, echo=TRUE}
+
+x <- c(1, 3, 5, 7, 9)
+
+```
+
+Maintenant que le vecteur est enregistrer sous son nom "`x`" (regardez dans votre environnement de travail !), nous pouvons l'utiliser en l'appelant par son nom :
+
+```{r, echo=TRUE}
+
+x 
+
+```
+
+On peut également vérifier qu'il s'agit bien d'un vecteur (Wickham, 2014)^[Wickham, H. (2014). *Advanced R*. New York: Chapman & Hall/CRC The R Series.] :
+
+```{r, echo=TRUE}
+
+is.atomic(x) || is.list(x)
+
+```
+
+On aurait aussi pu aussi, si on l'avait voulu, nommer le vecteur à la fin plutôt qu'au début :
+
+```{r, echo=TRUE}
+
+c(1, 3, 5, 7, 9) -> x
+
+x
+
+```
+
+Ou encore, nous aurions pu rendre plus explicite le fait que nous "attribuons" le nom "`x`" à la liste d'éléments :
+
+```{r, echo=TRUE}
+
+assign("x", c(1, 3, 5, 7, 9))
+
+x
+
+```
+
+Ainsi, plusieurs manières permettent de construire des vecteurs mais, précision importante, nous n'utiliserons désormais que la première qui est la plus commune sur Rstudio, par convention. Quelle que soit la manière dont nous choisissons, notons que le vecteur "`x`" comporte 5 éléments. On peut utiliser la fonction "`length()`" dans Rstudio pour nous le dire :
+
+```{r, echo=TRUE}
+
+length(x)
+
+```
+
+
+Nous pouvons ensuite **sélectionner des éléments** au sein d'un vecteur. Le vecteur de sélection "`x[index]`" peut être un vecteur d'entiers positifs, d'entiers négatifs ou logiques.
+La sélection la plus naturelle est celle des vecteurs entiers positifs. On parle alors d'extraire des éléments d'un vecteur par **indexation**. Pour exemple, pour le vecteur "`x`", supposons que l'on souhaite extraire les éléments "`2`" et "`4`", qui correspondent aux nombres "`3`" et "`7`" dans le vecteur "`x`" :
+
+```{r, echo=TRUE}
+
+x[c(2, 4)]
+
+```
+
+Les entiers sont des éléments à sélectionner et doivent être compris entre 1 et la longueur du vecteur "`x`" :
+
+```{r, echo=TRUE}
+
+x[3] # sélectionne le 3ème élément du vecteur x
+
+x[2:4] # Du 2ème au 4ème élément de x
+
+x[c(4, 4, 1:2)] # les éléments 4, 4, 1 et 2
+
+x[5:1] # les éléments 5, 4,..., 1
+
+```
+
+
+Supposons désormais que nous voulions **ajouter un nouvel élément** à notre vecteur dans une position particulière dans
+la liste, comme ajouter un 8 entre les nombres 7 et 9. Nous pourrions accomplir ceci en utilisant ce qui suit :
+
+
+```{r, echo=TRUE}
+
+x <- c(x[1:4], 8, x[5])
+
+x
+```
+
+Le vecteur reste inchangé pour les éléments allant de 1 jusqu'à 4, c'est ce qu'indique le premier terme dans la parenthèse ("`x[1:4]`"). Cependant, nous avons bien ajouté le nombre "`8`" en cinquième position dans le vecteur, comme indiqué par "`x[5]`". 
+
+Nous pouvons également **exclure des éléments** du vecteur. Supposons que nous souhaitons exclure le dernier
+élément de "`x`", qui correspond au nombre "`9`". Notez que "`9`" est en sixième position, nous souhaitons donc supprimer le sixième élément :
+
+```{r, echo=TRUE}
+
+x[-6]
+
+```
+
+
+Si nous voulions désormais supprimer les éléments "`2`" à "`4`" inclus, nous coderions :
+
+```{r, echo=TRUE}
+
+x[-2:-4]
+
+```
+
+<br>
+
+## **Les objets : les éléments qui composent les vecteurs**
+
+Rstudio admet plusieurs types d'objets :
+
+```{r  out.width = "70%", fig.cap=""}
+knitr::include_graphics("object.png")
+```
+
+Ainsi, nous pouvons définir un vecteur "`x`" comprenant ces différents types d'éléments^[Nous laisserons de côté les nombres complexes.] :
+
+```{r, echo=TRUE}
+
+x1 <- c(NULL, NULL, NULL)
+
+x2 <- c(TRUE, FALSE, TRUE)
+
+x3 <- c(0, 2.78, pi)
+
+x4 <- c ("A", "B", "C")
+
+x1
+
+x2
+
+x3
+
+x4
+
+```
+
+
+Nous pouvons également savoir directement le type d'objet du vecteur avec la commande "`mode()`" :
+
+```{r, echo=TRUE}
+
+mode(x1)
+
+mode(x2)
+
+mode(x3)
+
+mode(x4)
+```
+
+Il est également possible de tester à quel type d'objet appartiennent les éléments du vecteur "`x`" avec les commandes "`is.null()`", "`is.logical()`", "`is.numeric()`", "`is.character()`".  Les résultats sont alors booléens avec des valeurs "`TRUE`" ou "`FALSE`" :
+
+```{r, echo=TRUE}
+
+is.null(x1)
+
+is.null(x2)
+```
+
+
+Il est enfin possible de convertir le type d'objet de "`x`" dans un autre type donné explicitement en utilisant les commandes "`as.null()`" , "`as.logical()`" , "`as.numeric()`" , "`as.character()`". 
+
+
+```{r, echo=TRUE}
+
+as.character(x1)
+
+as.numeric(x2)
+
+as.logical(x3)
+```
+
+**Remarque importante** : *il faut être prudent quant à la signification de ces conversions. Rstudio donne toujours un résultat pour chaque instruction de conversion, même si c'est ce dernier n'a pas grand sens. La table de conversion (pierre de Rosette !) vous donnera les possibilités (Cornillon et al. 2012) :*
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("rosette.png")
+```
+
+<br>
+
+## **"Missing value"**
+
+Pour un certain nombre de raisons, certains éléments d'un vecteur donné peuvent être manquants (*c.f.* Séance 2, par exemple problème de collecte d'information pendant une enquête). Ces éléments sont appelés données manquantes ("*missing values*"). Ils ne sont donc pas disponibles pour l'utilisateur, et Rstudio les désigne "`NA`" pour "`Not Available`". Ce n'est pas un vrai mode et il a ses propres règles de calcul. Prenons par exemple le vecteur "`z`" :
+
+```{r, echo=TRUE}
+
+z <- c(1, NA, 2)
+
+```
+
+L'ajout d'un scalaire `1` à ce vecteur renverra le résultat suivant :
+
+```{r, echo=TRUE}
+
+z + 1
+
+```
+
+Comme précédemment, afin de savoir où trouver les valeurs manquantes pour un vecteur ``x``, il faut pose la question suivante :
+
+```{r, echo=TRUE}
+
+is.na(z)
+
+```
+
+Cela donne une réponse booléenne de la même longueur que le vecteur "`z`" (la question est donc posée élément
+par élément). 
+
+Dans le cas d'un vecteur "`z`", cela donne un vecteur logique identique avec "`TRUE`" si l'élément correspondant dans "`z`" est "`NA`", et "`FALSE`" sinon.
+
+<br>
+
+## **Type de vecteur : vecteurs numériques**
+
+Maintenant que nous connaissons les types d'objet admis par les vecteurs, nous pouvons également utiliser certaines fonctions pour construire plus rapidement des vecteurs numériques. Un vecteur peut tout d'abord être défini comme une "séquence" :
+
+```{r, echo=TRUE}
+
+x <- c(1:6)
+
+x
+
+```
+
+Le vecteur numérique comprend bien la séquence d'éléments indiqués entre les deux bornes, ce sont ici des nombres entiers (par défaut). Nous pouvons également utiliser la commande "`seq()`" pour définir un vecteur plus finement. De cette façon, le vecteur numérique peut contenir autant d'éléments nécessaires sur l'intervalle fixé en fixant les écarts entre deux éléments successifs :
+
+```{r, echo=TRUE}
+
+x<- seq(1, 6, by=0.5)
+
+x
+
+```
+
+Ou encore, en fixant le nombre d'éléments sans définir les écarts, égaux par défaut sur l'intervalle fixé :
+
+```{r, echo=TRUE}
+
+x <- seq(1, 6, length=5)
+
+x
+
+```
+
+Un vecteur numérique peut enfin être une simple répétition d'éléments, on utilisera alors la commande "`rep()`" :
+
+```{r, echo=TRUE}
+
+x <- rep(1, 6)
+
+x
+
+x <- rep(c(1, 2), each=3)
+
+x
+```
+
+
+<br>
+
+## **Type de vecteur : vecteurs "character"**
+
+Les vecteurs de type "character" comprennent non pas des éléments numériques mais d'ordre qualitatif (du texte, *c.f.* "type de vecteur" ci-dessous). Il est possible de les créer des vecteurs de caractères de la même manière que ceux numériques avec les fonctions "`c`" ou "`rep()`" :
+
+```{r, echo=TRUE}
+
+x <- c("A", "BB", "C1")
+
+x
+
+x <- rep('A', 5)
+
+x
+```
+
+Même si Rstudio interprète "`"`" et "`'`" de la même manière, nous utiliserons "`"`" à partir de maintenant, le plus commun dans la communauté.
+
+Une autre façon de faire est de manipuler différents objets et de les **concaténer** ou d'en extraire une partie. Pour concaténer les objets, utilisez la fonction "`paste()`" :
+
+```{r, echo=TRUE}
+
+x <- paste("X", 1:5, sep="-")
+
+x
+
+x <- paste(c("X", "Y"), 1:5, sep=".", collapse="+")
+
+x
+```
+
+L'argument "`collapse`" regroupe tous les éléments d'un vecteur avec une longueur de 1. Pour extraire, nous pourrons utiliser la commande "`substr()`" :
+
+```{r, echo=TRUE}
+
+x<- substr("freerider", 5, 9)
+
+x
+```
+
+Ceci extrait les éléments, qui sont ici des lettres, classés de "`5`" à "`9`" du mot "`freerider`" ce qui donne "`rider`".
+
+
+<br>
+
+## **Type de vecteur : vecteurs booléens ou logiques**
+
+Les vecteurs booléens sont généralement générés avec des opérateurs logiques: "`>` ", "`>=`", "`<`",
+"`<=", "`==`", "`!=`", etc. Ils peuvent également être générés à l'aide des fonctions "`seq()`", "`rep()`" et bien évidemment "`c`". Ils peuvent être utilisés pour effectuer des sélections complexes ou conditionner les opérations (voir *Cornillon et al. 2012, p 87).*. Examinons le exemple suivant:
+
+```{r, echo=TRUE}
+
+x<- 1>0
+
+x
+```
+
+Cette commande donne un vecteur logique de longueur 1 dont la valeur est donc "`TRUE`", car 1 est évidemment supérieur à 0 ! Dans le même sens :
+
+```{r, echo=TRUE}
+
+x <- c(1, 14, 18, 7, 8)
+
+x>13
+
+```
+
+Donne un vecteur logique de même longueur que le vecteur numérique "`x`". Les éléments du vecteur logique prennent de la même façon la valeur "`TRUE`" lorsque l'élément correspondant remplit la condition donnée (ici strictement supérieur à 13) et la valeur "`FALSE`" si, à l'inverse, ce n'est pas le cas. 
+
+Lors des calculs, le vecteur logique prend des valeurs numériques, dans ce cas, "`FALSE`" devient 0 et le "`TRUE`" devient 1. Un exemple, une test d'objet est créé, qui est le vecteur des logiques ("`FALSE, FALSE, TRUE`"). Nous calculons ensuite le produit suivant :
+
+```{r, echo=TRUE}
+
+x <- c(-1, 0, 2)
+
+test <- x > 1
+
+result <- (1+x^2)*(x>1)
+
+result
+```
+
+Les fonctions "`all()`" et "`any()`" peuvent également être utilisées.  La fonction "`all()`" donne "`TRUE`" si
+tous les éléments remplissent la condition, "`FALSE`" si au moins un élément ne respecte pas le critère donné. La fonction
+"`any()`" renvoie "`TRUE`" si l'un des éléments remplit la condition, et "`FALSE`" dans le cas inverse :
+
+```{r, echo=TRUE}
+
+x <- c(-1, 0, 2, 4)
+
+testA <- all(x>1)
+
+testA
+
+testB <- any(x>1)
+
+testB
+```
+
+
+
+<br>
+
+## **Opérations entre deux vecteurs numériques**
+
+Définissons désormais un second vecteur nommé "`y`" :
+
+```{r, echo=TRUE}
+
+x <- c(1, 3, 5, 7, 9)
+
+y <- c(2, 4, 6, 8, 10)
+
+```
+
+Ce vecteur "`y`" est de longueur "`5`" comme notre premier vecteur "`x`" :  
+
+```{r, echo=TRUE}
+
+length(y)
+
+```
+
+L'addition de vecteurs signifie ajouter le premier élément d'un vecteur au premier élément de l'autre vecteur, le deuxième élément du premier vecteur au deuxième élément de l'autre vecteur et ainsi de suite. De cette manière, en réutilisant notre premier vecteur "`x`" :
+
+```{r, echo=TRUE}
+
+x <- c(1, 3, 5, 7, 9)
+
+x + y
+
+```
+
+**Petit rappel d'algèbre linéaire** : *seuls les vecteurs avec le même nombre d'éléments peuvent être ajoutés.*
+
+Si nous essayons d'ajouter des vecteurs de différentes longueurs dans Rstudio, il commencera à **recycler les éléments du vecteur plus court**. Donc, si le vecteur "`y`" avait les éléments "`2, 4, 6, 8, 10, 12`" et nous essayons d'ajouter "`y`" à "`x`", nous obtiendrions :
+
+```{r, echo=TRUE}
+
+
+y <- c(2, 4, 6, 8, 10, 12)
+
+x + y
+
+```
+
+Comme on peut le voir, Rstudio a correctement ajouté les éléments des "`5`" premières positions dans chaque
+vecteur (c'est-à-dire : "`1 + 2 = 3`", "`3 + 4 = 7`", etc.). Mais lorsqu'il est arrivé au sixième élément sur le vecteur "`y`", respectivement égal à "`12`", il n'avait pas de sixième élément correspondant sur le vecteur "`x`" auquel l'ajouter. Alors Rstudio a recyclé le premier élément de "`x`". Autrement dit, il a ajouté "`12`" au premier élément de "`x`" ("`1`"), pour obtenir "`13`".
+
+<br>
+
+## **Union et intersection**
+
+Rstudio peut également gérer assez facilement les opérations sur les ensembles. Par exemple, nous pouvons définir
+deux ensembles d'éléments (des vecteurs donc...) comme suit :
+
+```{r, echo=TRUE}
+
+
+A <- c(1, 2, 3, 4, 5)
+
+B <- c(2, 3, 4, 5, 6)
+
+```
+
+<br>
+
+- *L'union*
+
+L'union de deux ensembles se définit comme l'ensemble des éléments appartenant à l'ensemble $A$ ou à l'ensemble $B$ ou aux deux (rappel de probabilités : $A \cup B$ : $\forall a$ et $\forall b$ $\exists B$ $\forall x(x\in B \iff x\in a \lor x\in b)$. 
+
+```{r  out.width = "20%", fig.cap=""}
+knitr::include_graphics("union.png")
+```
+
+Avec Rstudio, cette union entre les deux ensembles "`A`" et "`B`" peut être calculée par :
+
+```{r, echo=TRUE}
+
+union(A, B)
+
+```
+
+L'union de ces deux ensembles $A$ et $B$ est bien : $A \cup B = \{1, 2, 3, 4, 5\} \cup \{2, 3, 4, 5, 6\} = \{1, 2, 3, 4, 5, 6\}$
+
+<br>
+
+- *L'intersection*
+
+L'intersection de deux ensembles se définit comme l'ensemble des éléments appartenant conjointement à l'ensemble $A$ et à l'ensemble $B$ (rappel de probabilités : $A \cap B$ : $\forall A \exists B$ $\forall x(x\in B \iff x\in a \lor \sigma(x))$. 
+
+```{r  out.width = "20%", fig.cap=""}
+knitr::include_graphics("intersect.png")
+```
+
+Avec Rstudio, cette intersection entre les deux ensembles "`A`" et "`B`" peut être calculée par :
+
+```{r, echo=TRUE}
+
+intersect(A, B)
+
+```
+
+L'intersection de ces deux ensembles est bien : $A \cap B = \{1, 2, 3, 4, 5\} \cap \{2, 3, 4, 5, 6\} = \{2, 3, 4, 5\}$
+
+
+Nous pouvons être intéressés de savoir si les éléments d'un ensemble "`A`" sont contenus dans l'autre ensemble "`B`" :
+
+```{r, echo=TRUE}
+
+A %in% B
+
+```
+
+Le premier élément est "`FALSE`" car le nombre "`1`" de l'ensemble "`A`" n'apparaît effectivement pas dans l'ensemble "`B`". A contrario, toutes les autres valeurs sont "`TRUE`" car les nombres suivants de l'ensemble "`A`" se trouvent bien dans l'ensemble "`B`".
+
+Pour rappel : deux ensembles sont égaux s'ils ont les mêmes éléments. Nous pouvons tester l'égalité d'ensemble en utilisant la fonction "`setequal()`"
+
+```{r, echo=TRUE}
+
+setequal(A, B)
+
+```
+
+Observons que les deux ensembles ne sont pas égaux (surprise !).
+
+
+Nous pouvons également calculer une **somme cumulative** d'un vecteur en utilisant "`cumsum()`". Par exemple, la somme cumulée du vecteur x est calculée comme suit :
+
+```{r, echo=TRUE}
+
+
+cumsum(x)
+
+```
+
+Notez que la somme des deux premiers éléments est "`4`" ("`3 + 1`"), puis les trois premiers éléments "`9`" ("`1 + 3 + 5`"), etc. 
+
+Le produit cumulatif peut également être calculé en utilisant "`cumprod()`". Quand on parle du **produit scalaire** entre deux vecteurs, on se réfère à la **somme de chaque élément multipliée par paire**. Par exemple, pour nos vecteurs "`x`" et "`y`" nous définissons le produit scalaire comme :
+
+
+```{r, echo=TRUE}
+
+y <- c(2, 4, 6, 8, 10)
+
+x %*% y
+
+```
+
+Pour montrer comment cela a été calculé :
+
+
+```{r, echo=TRUE}
+
+cum.prod.function <- 1*2 + 3*4 + 5*6 + 7*8 + 9*10
+
+cum.prod.function
+
+
+```
+
+
+Notez que pour obtenir la somme, nous avons ajouté les produits respectifs de chaque élément du premier vecteur avec les éléments correspondants du deuxième vecteur. 
+
+On aurait pu tout aussi bien calculer le **produit scalaire** en utilisant "`crossprod(x, y)`" :
+
+```{r, echo=TRUE}
+
+crossprod(x,y)
+
+```
+
+Parfois, nous voulons redimensionner un vecteur par un scalaire ! Autrement dit, nous pourrions chercher à multiplier chaque élément du vecteur par par un nombre particulier. Par exemple, le vecteur "`x`" de longueur "`5`" par un facteur de 2 : 
+
+```{r, echo=TRUE}
+
+2 * x
+
+```
+
+Notez alors que chaque élément du vecteur a bien été multiplié par le scalaire "`2`". Cela a eu pour effet d'allonger le vecteur, puisque chaque élément de celui-ci a été multiplié par 2 !
+
+
+<br>
+
+## **Matrices**
+
+Les matrices sont des objets dit "atomics", ce qui signifie que tous les éléments qui la composent sont du même mode ou du même type (numéric, logical...). Chaque élément $a$ de la matrice $A$ peut être localisée par sa ligne $i$ et sa colonne $j$. La matrice $A$ contient $m_i$ lignes et $n_j$ colonnes, elle est donc de dimension $mn$ :
+
+```{r  out.width = "80%", fig.cap=""}
+knitr::include_graphics("matrice1.jpg")
+```
+
+Sur Rstudio, quand on parle d'une matrice, on se réfère tout simplement à un tableau de vecteurs contenus dans
+le même objet, la matrice. La compréhension du fonctionnement et des opérations sur les matrices est essentiel pour donner un sens à l'analyse statistique, aux modèles relativement avancés dans des contextes multivariés. Mais don't worry ! Nous revisiterons les matrices au fur et à mesure que nous en aurons besoin. Pour l'instant, nous souhaitons simplement démontrer comment nous pouvons construire une matrice, et calculez quelques opérations matricielles élémentaires.
+
+**Pour rappel :** *les deux attributs intrinsèques d'un objet Rstudio sont (i.) sa longueur, qui correspond ici au nombre total d'éléments de la matrice, et (ii.) le mode ou type d'objet, qui correspond ici au mode des éléments contenus dans cette matrice.* 
+
+Toutefois, les matrices incluent également un troisième attribut : la dimension "`dim()`", qui
+donne le nombre de lignes et le nombre de colonnes. Ils peuvent également posséder un attribut facultatif "`dimnames`". Voici les principales façons de créer une matrice. 
+
+- *fonction "`matrice`"* 
+
+La plus utilisée est la fonction matrice qui prend comme arguments le vecteur des éléments et le nombre de lignes
+ou colonnes dans la matrice :
+
+```{r, echo=TRUE}
+
+A <- matrix(1:6, 3, 2)
+
+A
+
+```
+
+où "`A`" est le nom de notre matrice, "`1:6`" désigne la matrice à avoir les entrées 1 à 6, c'est-à-dire avoir des nombres dans la matrice allant de 1 à 6, et "`3, 2`" demande à la matrice d'avoir 3 lignes et 2 colonnes. Mais on peut aussi, utiliser la fonction "`c`" en spécifiant le nombre de colonnes "`ncol`" ou de lignes "`nrow"` :
+
+```{r, echo=TRUE}
+
+A <- matrix(c(1, 2, 3, 4, 5, 6), ncol=2)
+
+A
+
+A <- matrix(c(1, 2, 3, 4, 5, 6), nrow=3)
+
+A
+
+```
+
+*Remarque 1 :* si nous spécifions trop d'éléments, autrement dit le vecteur est trop long, pour notre matrice mais trop peu de colonnes et/ou de lignes, R tronquera simplement la matrice. Par exemple,  une matrice avec des valeurs de 20 à 29, mais ne spécifie qu'une matrice "`2×2`". Par conséquent, Rstudio entre simplement les 4 premiers éléments de la matrice et ignore le reste des éléments :
+
+```{r, echo=TRUE}
+
+B <- matrix(20:29, 2, 2)
+
+B
+
+```
+
+
+*Remarque 2 :* si la longueur du vecteur est trop petite par rapport Au nombre d'éléments envisagés dans la matrice, Rstudio remplira tout de même la matrice entière avec les éléments disponibles. Lorsque le vecteur est trop petit, Rstudio le répète :
+
+```{r, echo=TRUE}
+
+B <- matrix(1:6, nrow=3, ncol=3)
+
+B
+
+```
+
+Il est possible de remplir une matrice avec un seul élément (un scalaire) sans avoir à créer le vecteur d'éléments de la matrice :
+
+```{r, echo=TRUE}
+
+C <- matrix(1, nrow=2, ncol=4)
+
+C
+
+```
+
+*Remarque 3 :* les vecteurs, en dehors de ceux d'éléments de matrice, ne sont pas considérés par Rstudio comme des matrices. Cependant, il est possible de transformer un vecteur en une matrice à une colonne en utilisant la fonction "`as.matrix()`" :
+
+```{r, echo=TRUE}
+
+x <- seq(1, 6, by=1)
+
+x
+
+C <- as.matrix(x)
+
+C
+```
+
+**Rappel :** *la position d'un élément dans une matrice est généralement indiquée par sa ligne $i$ et sa colonne $j$.* 
+
+Ainsi, pour sélectionner l'élément "`(i, j)`" de la matrice $`A`$, on pourra écrire :
+
+```{r, echo=TRUE, eval=FALSE}
+
+A[i,j]
+
+```
+
+Cependant, il est très rare de n'avoir à sélectionner qu'un seul élément dans une matrice. Généralement, plusieurs des lignes et / ou des colonnes sont sélectionnées. Examinons les différents cas possibles sur la matrice $A$ :
+
+
+```{r, echo=TRUE}
+
+A <- matrix(c(1:6), nrow=3)
+
+A
+```
+
+
+<br>
+
+- *Sélection par entier positif*
+
+```{r, echo=TRUE}
+
+# A[i,] pour i = 2
+
+A[2, ]
+```
+
+Cela donne bien la ligne $i=2$ de la matrice $A$ sous la forme d'un vecteur.
+
+```{r, echo=TRUE}
+
+# A[i ,, drop = F] pour i = 3
+
+A[3,, drop = F]
+```
+
+Donne cette fois la ligne $i=3$ de la matrice $A$ sous la forme d'une matrice à une seule ligne et non un vecteur (donc
+le nom de la ligne peut être conservé).
+
+```{r, echo=TRUE}
+
+# m[, c(j)] pour j = 2, 1 et 2
+
+A[, c(2, 1, 2)]
+```
+
+Donne la deuxième, la première et encore la deuxième colonnes de la matrice $A$ sous une forme matricielle.
+
+<br>
+
+- *Sélection par entier négatif*
+
+
+```{r, echo=TRUE}
+
+# A[-i, ] pour i = 3
+
+A[-3, ]
+```
+
+Donne la matrice $A$ sans la troisième ligne.
+
+```{r, echo=TRUE}
+
+# A[, -j] pour j = 1
+
+A[1:2, -1]
+```
+
+Donne les deux premières lignes de $A$ sans sa première colonne.
+
+
+<br>
+
+- *Sélection booléenne (logique)*
+
+
+L'instruction suivante ne donne que les colonnes de $A$ pour lesquelles la valeur sur la première ligne est strictement supérieur à 2 :
+
+```{r, echo=TRUE}
+
+A[, A [1,]> 2]
+```
+
+Il s'agit bien sûr d'une matrice, alors que l'instruction suivante donne un vecteur contenant les valeurs de $A$ strictement supérieures à 2 :
+
+```{r, echo=TRUE}
+
+A[A > 2]
+```
+
+
+<br>
+
+- *Sélection avec remplacement*
+
+L'instruction suivante remplace les valeurs de $A$ qui sont supérieures à 2 avec "`NA`" :
+
+```{r, echo=TRUE}
+
+A[A > 2] <- NA
+
+A
+```
+
+<br>
+
+## **Rappels de calcul matriciel**
+
+Quelques opérations sur les matrices :
+
+
+```{r, echo=TRUE}
+
+A <- matrix(c(1:4), nrow= 2)
+
+A
+
+B <- matrix(c(3:6), ncol = 2)
+
+B
+
+
+C <- A + B
+
+C
+
+D <- A * B
+
+D
+
+
+E <- exp(A)
+
+E
+
+F <- A^B
+
+F
+```
+
+
+Le tableau suivant donne les fonctions les plus utiles pour de l'algèbre linéaire.
+
+```{r  out.width = "60%", fig.cap=""}
+knitr::include_graphics("matrice2.png")
+```
+Imaginons ce système :
+
+$26 x + 30 y = 1$
+
+$38 x + 44 y = 2$
+
+Par exemple la fonction "`solve()`" pourrait nous permettre de résoudre ce système d'équations très facilement :
+
+
+```{r, echo=TRUE}
+
+D <- matrix(c(26, 38, 30, 44), ncol = 2)
+
+D
+
+# Notons que :
+
+A <- matrix(1:4, ncol=2)
+
+A
+
+B <- matrix(c(5, 6, 7, 8), ncol=2)
+
+B
+
+D <- A %*%t(B) # On multiplie A par la matrice B transposée
+
+D
+
+# Intéressant !
+
+V <- c(1,2) # On identifie ici les deux inconnues "x" et "y" en entrant ce qui se passe dans les membres de droite du système
+
+solve(D, V)
+```
+
+Ainsi, $x=-4$ et $y=3.5$ !
+
+**Rappel :** on appelle **transposée** une matrice $A$ de type $(m, n)$ et de terme général $a_{ij}$, la matrice $A^t$ obtenue en échangeant les lignes $i$ et les colonnes $j$ de même indice de $A$ :
+
+$A = a_{ij} \iff A^t = a_{ij}^t = a_{ji}$
+
+```{r  out.width = "30%", fig.cap=""}
+knitr::include_graphics("Matrix.gif")
+```
+
+Par conséquent : $(A^t)^t = A$
+
+
+<br>
+
+## **Les facteurs**
+
+
+Les **facteurs sont des vecteurs qui permettent d'utilisateur et de manipuler des données qualitatives**.
+
+La longueur est déterminée par la fonction de "`length()`", le mode par la fonction "`mode()`" et les catégories
+du facteur par "`levels()`". Ils forment une classe d'objets et sont traités différemment selon la fonction, comme la fonction "`plot()`" pour les représentations graphiques (comme nous le verrons lors de la séance 2). Les facteurs peuvent être **non ordinale** (`homme`, `femme`) ou **ordinale** (`niveau d'aptitude en statistiques`). Trois fonctions peut être utilisé pour créer des facteurs. Tout d'abord la fonction "`factor()`" :
+
+```{r, echo=TRUE}
+
+gender <- factor(c("M","M","F","M","F","M","M","M"))
+
+gender
+```
+
+Nous pouvons également nommer chaque catégorie "`level()`" au fur et à mesure que le facteur est construit :
+
+```{r, echo=TRUE}
+
+gender <- factor(c(2,2,1,2,1,2,1),labels=c("woman","man"))
+
+gender
+```
+
+La fonction "`ordered()`" peut aussi être très utile :
+
+```{r, echo=TRUE}
+
+ability <- ordered(c("beginner","beginner","expert", "expert","intermediate","intermediate","intermediate", "expert"),levels=c("beginner","intermediate","expert"))
+
+ability
+```
+
+La fonction "`as.factor()`" s'utilise de la même manière que précédemment :
+
+
+```{r, echo=TRUE}
+
+v <- c(1:5, 5:1)
+
+v
+
+f <- as.factor(v)
+
+f
+```
+
+Afin de connaître les catégories, le nombre de catégories et le nombre d'éléments par catégories, on utilise pour le facteur "`f`" : 
+
+```{r, echo=TRUE}
+
+levels(f)
+
+nlevels(f)
+
+table(f)
+
+f
+```
+
+Nous le verrons lors de la séance 3, la fonction `table()` peut également être utilisée pour construire des tableaux croisés.
+
+<br>
+
+# **Introduction à R-Markdown**
+
+Tout d'abord, une première courte vidéo pour comprendre qu'est-ce que R-Markdown :
+
+"https://vimeo.com/178485416"
+
+Et maintenant, une seconde vidéo pour commencer :
+
+"https://www.youtube.com/watch?v=FO6Jo3Y9knk&ab_channel=MichelCucherat"
+
+Maintenant on refait l'exemple ensemble !
+
+Pour aller plus loin : [R-Markdown for Begginers](https://rmarkdown.rstudio.com/lesson-1.html).
+
+
+**A partir de maintenant je ne veux recevoir que des fichiers** "`.html`" de votre part, le tout en R-Markdown !
+
+
+<br>
+<br>
+<br>
+
+*Contact : <thibaud.deguilhem@u-paris.fr>*
